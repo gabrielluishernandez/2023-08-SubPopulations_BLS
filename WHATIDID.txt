@@ -91,4 +91,14 @@ awk '{print $9,$10,$11,$12,$2,$3,$6,$7,$8}' results/08-03-Combined_Chr13.txt | s
 awk '{print $9,$10,$11,$12,$2,$3,$6,$7,$8}' results/08-03-Combined_Chr14.txt | sed 's/\s/\t/g' > results/08-03-Combined_Chr14_ordered.txt
 awk '{print $9,$10,$11,$12,$2,$3,$6,$7,$8}' results/08-03-Combined_Chr15.txt | sed 's/\s/\t/g' > results/08-03-Combined_Chr15_ordered.txt
 awk '{print $9,$10,$11,$12,$2,$3,$6,$7,$8}' results/08-03-Combined_Chr16.txt | sed 's/\s/\t/g' > results/08-03-Combined_Chr16_ordered.txt
- 
+
+# Get gff and subset per chromosome 
+cp /data/home/btx422/hive/flopezosorio/2021_popgen_invicta_richteri/results/01_map_annotations/2021-10-28-liftoff_ncbi_annotations/qmul_sinvicta_genomic.liftoff.tidy.longest_isoform.gff input/.
+parallel 'bedtools intersect -wo -a input/qmul_sinvicta_genomic.liftoff.tidy.longest_isoform.gff -b results/08-03-Combined_Chr{}_ordered.txt > results/Chr{}.gff' :::: short_chr_names
+cat results/*gff > results/08-03-All_Chr_anotation.gff
+
+# Get the genes from gff
+grep -Po "gene=\K.*?;" results/08-03-All_Chr_anotation.gff | sed 's/;//g' | uniq > tmp/list_unique_ids.txt
+grep -f tmp/list_unique_ids.txt results/08-03-All_Chr_anotation.gff | awk '{print $(NF-9),$(NF-7),$(NF-6),$(NF-5),$(NF-4),$(NF-3),$(NF-2),$(NF-1)}' > tmp/out.txt
+grep -Po "gene=\K.*?;" results/08-03-All_Chr_anotation.gff | sed 's/;//g' > tmp/list_ids.txt
+paste tmp/list_ids.txt tmp/out.txt > results/Genes_Scored.txt
