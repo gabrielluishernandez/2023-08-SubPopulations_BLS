@@ -140,12 +140,21 @@ ggplot(bias_and_all %>% subset(gene != "LOC105199771") %>%
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
+
 bias_and_all <- arrange(bias_and_all, density)
 
+write.table(bias_and_all, 
+            "../gitstuff/2023-08-02-Single_Population_BLS/results/2023-08-03-Pop3.txt", 
+            quote = FALSE, col.names = TRUE, row.names = FALSE)
+
 write.table(bias_and_all$gene, 
-            "~/gitstuff/2023-08-02-Single_Population_BLS/2023_04_21_ranked_by_dens.txt", 
-            quote = FALSE,
-            col.names = TRUE, row.names = FALSE)
+            "../gitstuff/2023-08-02-Single_Population_BLS/results/2023-08-03-Pop3_Genes.txt", 
+            quote = FALSE, col.names = FALSE, row.names = FALSE)
+
+candidates_pop3 <- subset(bias_and_all, candens == "1")
+write.table(candidates_pop3$gene, 
+            "../gitstuff/2023-08-02-Single_Population_BLS/results/2023-08-03-Pop3_Candidate_Genes.txt", 
+            quote = FALSE, col.names = FALSE, row.names = FALSE)
 
 ```
 
