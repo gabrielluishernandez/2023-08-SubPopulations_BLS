@@ -174,9 +174,7 @@ plot_immune_single <- ggplot(bias_and_all %>%
   scale_colour_viridis_d(option = "D", direction = 1) +
  # labs(subtitle = "Candidates from previous analysis") +
   #guides(shape = FALSE) +
-  theme_minimal()+
-  theme(legend.position = "bottom",
-        legend.box = "horizontal")
+  theme_minimal()
 
 ```
 
@@ -409,9 +407,7 @@ plot_candidates_multiple <- ggplot(bias_and_all %>%
   scale_colour_viridis_d(option = "C", direction = 1) +
   #labs(subtitle = "Candidates from previous analysis") +
   #guides(shape = FALSE) +
-  theme_minimal() +
-  theme(legend.position = "bottom",
-        legend.box = "horizontal")
+  theme_minimal() 
 
 ```
 
@@ -438,9 +434,7 @@ plot_immune_multiple <- ggplot(bias_and_all %>%
   scale_colour_viridis_d(option = "C", direction = 1, name = "Immune") +
  # labs(subtitle = "Candidates from previous analysis") +
   #guides(shape = FALSE) +
-  theme_minimal()+
-  theme(legend.position = "bottom",
-        legend.box = "horizontal")
+  theme_minimal()
 
 ```
 
@@ -483,8 +477,6 @@ gene3 <- subset(bias_and_all, gene == "LOC105202344")
 three_genes <- rbind(gene1, gene2, gene3)
 
 ```
-
-
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
@@ -570,6 +562,7 @@ plot_busco_single
 plot_busco_multiple
 
 ```
+
 # ORs
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
@@ -579,7 +572,7 @@ plot_ors_multiple
 
 ```
 
-# Chromosome
+# Per chromosome
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -594,6 +587,5 @@ plot_chr_multiple
 
 plot_density_single
 plot_density_multiple
-
 
 ```
