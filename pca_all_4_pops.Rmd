@@ -1,3 +1,4 @@
+
 ```{r echo=FALSE,  message=FALSE, warning=FALSE}
 library(tidyverse)
 library(gridExtra)
@@ -7,238 +8,248 @@ library(ggpubr)
 library(ggrepel)
 ```
 
+# PCA for subpopulation
+### CLR
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# Load data, rename and merge the populations in a single data frame
-
-pop1_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-1.txt', 
-                         header = TRUE)
-pop1_genes <- pop1_genes[, c("gene", "clr", "ncd05")]
-names(pop1_genes) <- c("gene", "clr_pop1", "ncd05_pop1")
-
-pop2_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-2.txt', 
-                         header = TRUE)
-pop2_genes <- pop2_genes[, c("gene", "clr", "ncd05")]
-names(pop2_genes) <- c("gene", "clr_pop2", "ncd05_pop2")
-
-pop3_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-3.txt', 
-                         header = TRUE)
-pop3_genes <- pop3_genes[, c("gene", "clr", "ncd05")]
-names(pop3_genes) <- c("gene", "clr_pop3", "ncd05_pop3")
-
-pop4_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-4.txt', 
-                         header = TRUE)
-pop4_genes <- pop4_genes[, c("gene", "clr", "ncd05")]
-names(pop4_genes) <- c("gene", "clr_pop4", "ncd05_pop4")
-
-merged_pops <- merge(
-  merge(
-    merge(
-      pop1_genes, pop2_genes, by = "gene"), 
-    pop3_genes, by = "gene"), 
-  pop4_genes, by = "gene"
-  )
-
-```
-
-Head of input file to be standardized and then used in prcomp
-
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-
-head(merged_pops)
-
-
-#Standardize data 
-
-gene_names <- merged_pops$gene
-standardized_data <- scale(merged_pops[, -1])
-
-# Perform PCA
-pca_result <- prcomp(standardized_data, center = TRUE, scale. = TRUE)
-
-# Create a data frame with PCA scores
-pca_scores <- as.data.frame(pca_result$x)
-#colnames(pca_scores) <- c("PC1", "PC2")  # Rename columns
-```
-
-Explained variance 
-
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-
-explained_variance <- (pca_result$sdev^2) / sum(pca_result$sdev^2)
-explained_variance
-
-```
-
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-# Add gene names back
-pca_results_with_names <- data.frame(
-  gene = gene_names,
-  PC1 = pca_scores$PC1,
-  PC2 = pca_scores$PC2,
-  PC3 = pca_scores$PC3,
-  PC4 = pca_scores$PC4,
-  PC5 = pca_scores$PC5,
-  PC6 = pca_scores$PC6,
-  PC7 = pca_scores$PC7,
-  PC8 = pca_scores$PC8
-)
-
-#get the master table
-bias_and_all <- read.table('input/2023_08_22_MASTER_cleaned_all_pops.txt',
-                             header = TRUE) 
-
-
-bias_and_all <- merge(bias_and_all, pca_results_with_names, by = "gene")
-bias_and_all$candens <- as.factor(bias_and_all$candens)
-bias_and_all$hymenop <- as.factor(bias_and_all$hymenop)
-bias_and_all$pop1 <- as.factor(bias_and_all$pop1)
-
-```
-
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-
-ggplot(bias_and_all %>% arrange(candens), 
-       aes(x = PC1, y = PC2, colour = candens, shape = candens)) +
-  geom_point(size = 4, alpha = 0.6) +
-  scale_colour_viridis_d(option = "D", direction = 1, name = "Genes in top 1%",
-                         labels = c("No","Yes")) +
-  guides(shape = FALSE)+
-  theme_minimal()
-
-```
-
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-#adjust = 50,
-ggplot(bias_and_all %>% arrange(candens), 
-       aes(x = PC1, y = PC2)) +
-  geom_pointdensity( size = 4, shape = 18) +
-  scale_colour_viridis_c(option = "D", direction = 1)+ # , name = "Immune", labels = c("No","Yes"))
-  #geom_text(hjust = 0, vjust = 0) +
-  #labs(x = "PC1", y = "PC2")+
-  theme_minimal()
-
-```
-
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-
-ggplot(bias_and_all %>% arrange(desc(density)), 
-       aes(x = PC1, y = PC2, colour = density, shape = candens)) +
-  geom_point(size = 4, alpha = 0.6) +
-  scale_colour_viridis_c(option = "D", direction = 1) +
-  guides(shape = FALSE)+
-  theme_minimal()
-
-```
-
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-
-ggplot(bias_and_all %>% arrange(clr), 
-       aes(x = PC1, y = PC2, colour = clr, shape = candens)) +
-  geom_point(size = 4, alpha = 0.6) +
-  scale_colour_viridis_c(option = "D", direction = -1) +
-  guides(shape = FALSE)+
-  theme_minimal()
-
-```
-
-
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-
-strong_genes <- subset(bias_and_all, PC1 <= -5) %>% arrange(desc(PC1))
-
-write.table(strong_genes, file = "stong_genes_pca.txt", quote = FALSE,
-            row.names = FALSE, col.names = FALSE)
-
-
-ensemble_names <- read.table('pca_genes_ensembl.txt', 
-                         header = TRUE, sep = "\t")
-
-strong_genes <- merge(strong_genes, ensemble_names, by = "gene" )
-```
-
-
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-
-ggplot(bias_and_all %>% arrange(candens)
-       , aes(x = PC1, y = PC2, colour = candens, shape = candens)) +
-  geom_point(size = 4, alpha = 0.6) +
-  geom_label_repel(data = strong_genes, aes(label = gene), colour = "black",
-                   size=2, nudge_x = 6, nudge_y = 6) +
-  scale_colour_viridis_d(option = "D", direction = -1, name = "Genes in top 1%",
-                         labels = c("No","Yes")) + 
-  labs(x = "PC1", y = "PC2") + 
-  guides(shape = FALSE) +
-  theme_minimal()
-
-```
-
-
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-ggplot(bias_and_all %>% arrange(candens)
-       , aes(x = PC1, y = PC2, colour = candens, shape = candens)) +
-  geom_point(size = 4, alpha = 0.6) +
-  geom_label_repel(data = strong_genes, aes(label = name), colour = "black",
-                   size=2, nudge_x = 3, nudge_y = 6) +
-  scale_colour_viridis_d(option = "D", direction = -1, name = "Genes in top 1%",
-                         labels = c("No","Yes")) + 
-  labs(x = "PC1", y = "PC2") + 
-  guides(shape = FALSE) +
-  theme_minimal()
-
-```
-
-
-
-
-
-####################3
-
-
-####PCA by population
-
-
-```{r echo=TRUE, message=FALSE, warning=FALSE}
 ##
 pop1_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-1.txt', 
                          header = TRUE)
 pop1_genes <- pop1_genes[, c("gene", "clr")]
 names(pop1_genes) <- c("gene", "clr_pop1")
-wide_pop1 <- pivot_wider(pop1_genes, names_from = "gene", values_from = "clr_pop1")
+wide_pop1 <- pivot_wider(pop1_genes, names_from = "gene", 
+                         values_from = "clr_pop1")
 
 ##
 pop2_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-2.txt', 
                          header = TRUE)
 pop2_genes <- pop2_genes[, c("gene", "clr")]
 names(pop2_genes) <- c("gene", "clr_pop2")
-wide_pop2 <- pivot_wider(pop2_genes, names_from = "gene", values_from = "clr_pop2")
+wide_pop2 <- pivot_wider(pop2_genes, names_from = "gene", 
+                         values_from = "clr_pop2")
 
 ##
 pop3_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-3.txt', 
                          header = TRUE)
 pop3_genes <- pop3_genes[, c("gene", "clr")]
 names(pop3_genes) <- c("gene", "clr_pop3")
-wide_pop3 <- pivot_wider(pop3_genes, names_from = "gene", values_from = "clr_pop3")
+wide_pop3 <- pivot_wider(pop3_genes, names_from = "gene", 
+                         values_from = "clr_pop3")
 
 ##
 pop4_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-4.txt', 
                          header = TRUE)
 pop4_genes <- pop4_genes[, c("gene", "clr")]
 names(pop4_genes) <- c("gene", "clr_pop4")
-wide_pop4 <- pivot_wider(pop4_genes, names_from = "gene", values_from = "clr_pop4")
+wide_pop4 <- pivot_wider(pop4_genes, names_from = "gene", 
+                         values_from = "clr_pop4")
 
 ```
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
+#10864
 merged_wide_clr <- bind_rows(wide_pop1, wide_pop2, wide_pop3, wide_pop4)
 
 merged_wide_clr <- merged_wide_clr %>% select_if(~ !any(is.na(.)))
+#6369
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+pairs(t(merged_wide_clr))
+
+cor(t(merged_wide_clr))
 
 ```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+bias_and_all <- read.table('input/2023_08_22_MASTER_cleaned_all_pops.txt',
+                             header = TRUE)
+
+common_loci <- names(merged_wide_clr)
+means_pops_clrs <- colMeans(merged_wide_clr)
+#combined_cls <- colMeans(merged_wide_clr)
+#plot(means_pops_clrs,combined_clr,pch='.')
+clrs = bias_and_all$clr
+names(clrs) <- bias_and_all$gene
+
+plot(clrs[common_loci], means_pops_clrs, pch = ".")
+abline(30,-1)
+
+
+clr_plot_data <- data.frame(
+  gene = common_loci,
+  Clr = clrs[common_loci],
+  Mean_Pops_Clr = means_pops_clrs
+)
+
+clr_plot_data <- merge(clr_plot_data, bias_and_all, by= "gene")
+clr_plot_data$candens <- as.factor(clr_plot_data$candens)
+
+#locus = rep(names(merged_wide_clr),each=4)
+#population = rep(paste("pop",1:4),dim(merged_wide_clr)[2])
+#score <- as.vector(as.matrix(merged_wide_clr))
+#longdat <-data.frame(locus,population,score)
+#mod1 <- lm(score ~ 0+locus, data = longdat)
+
+#head(coef(mod1))
+#combined_clr <- coef(mod1)
+
+
+```
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+ggplot(clr_plot_data %>% arrange(candens), 
+       aes(x = Clr, y = Mean_Pops_Clr, colour = candens)) +
+  geom_point(size = 4, alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE, color = "grey") +  # Adding linear regression line
+  #geom_label_repel(data = strong_genes, aes(label = gene), colour = "black",
+   #                size= 2, nudge_x = 3, nudge_y = 6, direction = "both",
+    #               box.padding = 0.3, max.overlaps = 50) +
+  scale_colour_viridis_d(option = "D", direction = -1, name = "Genes in top 1%",
+                        labels = c("No","Yes")) + 
+  labs(x = "CLR all samples", y = "CLR mean for 4 pops") + 
+  #guides(shape = FALSE) +
+  theme_minimal()
+
+```
+
+
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 
 standardized_data <- scale(merged_wide_clr)
 
+# Perform PCA
+pca_result <- prcomp(standardized_data, center = TRUE, scale. = TRUE)
+
+# Create a data frame with PCA scores
+pca_scores <- as.data.frame(pca_result$x)
+
+```
+
+Explained variance 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+explained_variance <- (pca_result$sdev^2) / sum(pca_result$sdev^2)
+explained_variance
+
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+pca_scores$row_number <- seq_len(nrow(pca_scores))
+
+# Create a scatter plot with colored dots based on row number
+pca_ballermix <- ggplot(pca_scores, aes(x = PC1, y = PC2, color = as.factor(row_number))) +
+  scale_colour_viridis_d(option = "D", direction = 1, name = "SubPop") + 
+  geom_point(size = 4) + labs(subtitle = "ballermix") +
+  theme_minimal()
+
+```
+
+
+### NCD
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+##
+pop1_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-1.txt', 
+                         header = TRUE)
+pop1_genes <- pop1_genes[, c("gene", "ncd05")]
+names(pop1_genes) <- c("gene", "ncd05_pop1")
+wide_pop1 <- pivot_wider(pop1_genes, names_from = "gene", 
+                         values_from = "ncd05_pop1")
+
+##
+pop2_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-2.txt', 
+                         header = TRUE)
+pop2_genes <- pop2_genes[, c("gene", "ncd05")]
+names(pop2_genes) <- c("gene", "ncd05_pop2")
+wide_pop2 <- pivot_wider(pop2_genes, names_from = "gene", 
+                         values_from = "ncd05_pop2")
+
+##
+pop3_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-3.txt', 
+                         header = TRUE)
+pop3_genes <- pop3_genes[, c("gene", "ncd05")]
+names(pop3_genes) <- c("gene", "ncd05_pop3")
+wide_pop3 <- pivot_wider(pop3_genes, names_from = "gene", 
+                         values_from = "ncd05_pop3")
+
+##
+pop4_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-4.txt', 
+                         header = TRUE)
+pop4_genes <- pop4_genes[, c("gene", "ncd05")]
+names(pop4_genes) <- c("gene", "ncd05_pop4")
+wide_pop4 <- pivot_wider(pop4_genes, names_from = "gene", 
+                         values_from = "ncd05_pop4")
+
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+#10864
+merged_wide_ncd05 <- bind_rows(wide_pop1, wide_pop2, wide_pop3, wide_pop4)
+
+merged_wide_ncd05 <- merged_wide_ncd05 %>% select_if(~ !any(is.na(.)))
+#6369
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+pairs(t(merged_wide_ncd05))
+
+```
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+common_loci <- names(merged_wide_ncd05)
+means_pops_ncd <- colMeans(merged_wide_ncd05)
+ncd = bias_and_all$ncd05
+names(ncd) <- bias_and_all$gene
+
+ncd_plot_data <- data.frame(
+  gene = common_loci,
+  ncd = ncd[common_loci],
+  mean_pops_ncd = means_pops_ncd
+)
+
+ncd_plot_data <- merge(ncd_plot_data, bias_and_all, by= "gene")
+ncd_plot_data$candens <- as.factor(ncd_plot_data$candens)
+
+
+```
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+ggplot(ncd_plot_data %>% arrange(candens), 
+       aes(x = ncd05, y = mean_pops_ncd, colour = candens)) +
+  geom_point(size = 4, alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE, color = "grey") +  # Adding linear regression line
+  #geom_label_repel(data = strong_genes, aes(label = gene), colour = "black",
+   #                size= 2, nudge_x = 3, nudge_y = 6, direction = "both",
+    #               box.padding = 0.3, max.overlaps = 50) +
+  scale_colour_viridis_d(option = "D", direction = -1, name = "Genes in top 1%",
+                        labels = c("No","Yes")) + 
+  labs(x = "CLR all samples", y = "CLR mean for 4 pops") + 
+  #guides(shape = FALSE) +
+  theme_minimal()
+
+```
+
+
+
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+standardized_data <- scale(merged_wide_ncd05)
 
 # Perform PCA
 pca_result <- prcomp(standardized_data, center = TRUE, scale. = TRUE)
@@ -249,10 +260,100 @@ pca_scores <- as.data.frame(pca_result$x)
 ```
 
 
+Explained variance 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+explained_variance <- (pca_result$sdev^2) / sum(pca_result$sdev^2)
+explained_variance
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+pca_scores$row_number <- seq_len(nrow(pca_scores))
+
+# Create a scatter plot with colored dots based on row number
+pca_ncd <- ggplot(pca_scores, aes(x = PC1, y = PC2, color = as.factor(row_number))) +
+  scale_colour_viridis_d(option = "D", direction = 1, name = "SubPop") + 
+  geom_point(size = 4) + labs(subtitle = "ncd") +
+  theme_minimal()
+
+```
+
+
+
+
+### Density-based (combined ncd and clr)
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+##
+pop1_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-1.txt', 
+                         header = TRUE)
+pop1_genes <- pop1_genes[, c("gene", "density")]
+names(pop1_genes) <- c("gene", "density_pop1")
+wide_pop1 <- pivot_wider(pop1_genes, names_from = "gene", 
+                         values_from = "density_pop1")
+
+##
+pop2_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-2.txt', 
+                         header = TRUE)
+pop2_genes <- pop2_genes[, c("gene", "density")]
+names(pop2_genes) <- c("gene", "density_pop2")
+wide_pop2 <- pivot_wider(pop2_genes, names_from = "gene", 
+                         values_from = "density_pop2")
+
+##
+pop3_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-3.txt', 
+                         header = TRUE)
+pop3_genes <- pop3_genes[, c("gene", "density")]
+names(pop3_genes) <- c("gene", "density_pop3")
+wide_pop3 <- pivot_wider(pop3_genes, names_from = "gene", 
+                         values_from = "density_pop3")
+
+##
+pop4_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-4.txt', 
+                         header = TRUE)
+pop4_genes <- pop4_genes[, c("gene", "density")]
+names(pop4_genes) <- c("gene", "density_pop4")
+wide_pop4 <- pivot_wider(pop4_genes, names_from = "gene", 
+                         values_from = "density_pop4")
+
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+#10864
+merged_wide_density <- bind_rows(wide_pop1, wide_pop2, wide_pop3, wide_pop4)
+
+merged_wide_density <- merged_wide_density %>% select_if(~ !any(is.na(.)))
+#6369
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+pairs(exp(t(merged_wide_density)))
+
+pairs(t(merged_wide_density))
+
+cor(t(merged_wide_density))
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+standardized_data <- scale(merged_wide_density)
+
+# Perform PCA
+pca_result <- prcomp(standardized_data, center = TRUE, scale. = TRUE)
+
+# Create a data frame with PCA scores
+pca_scores <- as.data.frame(pca_result$x)
+
+```
+
 
 Explained variance 
 
-```{r echo=TRUE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 explained_variance <- (pca_result$sdev^2) / sum(pca_result$sdev^2)
 explained_variance
@@ -260,41 +361,53 @@ explained_variance
 ```
 
 
-```{r echo=TRUE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
 pca_scores$row_number <- seq_len(nrow(pca_scores))
 
 # Create a scatter plot with colored dots based on row number
-ggplot(pca_scores, aes(x = PC1, y = PC2, color = as.factor(row_number))) +
-  geom_point(size = 4) +
+pca_density <- ggplot(pca_scores, aes(x = PC1, y = PC2, color = as.factor(row_number))) +
+  scale_colour_viridis_d(option = "D", direction = 1, name = "SubPop") + 
+  geom_point(size = 4) + labs(subtitle = "Combined ncd+ballermix by density") +
   theme_minimal()
 
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+grid.arrange(pca_ballermix, pca_ncd, pca_density)
 
 ```
 
 
 
 
+
+
+
+#########
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-top5pc_pop1_genes <- read.table('input/2023-08-04-POP-1-Candidate_Genes_top5pc.txt', 
-                         header = FALSE)
-bias_and_all$top5pc_pop1 <- bias_and_all$gene %in% top5pc_pop1_genes$V1
-bias_and_all$top5pc_pop1 <- as.factor(bias_and_all$top5pc_pop1*1)
-
-top5pc_pop2_genes <- read.table('input/2023-08-04-POP-2_Candidate_Genes_top5pc.txt', 
-                         header = FALSE)
-bias_and_all$top5pc_pop2 <- bias_and_all$gene %in% top5pc_pop2_genes$V1
-bias_and_all$top5pc_pop2 <- as.factor(bias_and_all$top5pc_pop1*1)
-
-top5pc_pop3_genes <- read.table('input/2023-08-04-POP-3_Candidate_Genes_top5pc.txt', 
-                         header = FALSE)
-bias_and_all$top5pc_pop3 <- bias_and_all$gene %in% top5pc_pop3_genes$V1
-bias_and_all$top5pc_pop3 <- as.factor(bias_and_all$top5pc_pop1*1)
-
-top5pc_pop4_genes <- read.table('input/2023-08-04-POP-4_Candidate_Genes_top5pc.txt', 
-                         header = FALSE)
-bias_and_all$top5pc_pop4 <- bias_and_all$gene %in% top5pc_pop4_genes$V1
-bias_and_all$top5pc_pop4 <- as.factor(bias_and_all$top5pc_pop1*1)
+# top5pc_pop1_genes <- read.table('input/2023-08-04-POP-1-Candidate_Genes_top5pc.txt', 
+#                          header = FALSE)
+# bias_and_all$top5pc_pop1 <- bias_and_all$gene %in% top5pc_pop1_genes$V1
+# bias_and_all$top5pc_pop1 <- as.factor(bias_and_all$top5pc_pop1*1)
+# 
+# top5pc_pop2_genes <- read.table('input/2023-08-04-POP-2_Candidate_Genes_top5pc.txt', 
+#                          header = FALSE)
+# bias_and_all$top5pc_pop2 <- bias_and_all$gene %in% top5pc_pop2_genes$V1
+# bias_and_all$top5pc_pop2 <- as.factor(bias_and_all$top5pc_pop1*1)
+# 
+# top5pc_pop3_genes <- read.table('input/2023-08-04-POP-3_Candidate_Genes_top5pc.txt', 
+#                          header = FALSE)
+# bias_and_all$top5pc_pop3 <- bias_and_all$gene %in% top5pc_pop3_genes$V1
+# bias_and_all$top5pc_pop3 <- as.factor(bias_and_all$top5pc_pop1*1)
+# 
+# top5pc_pop4_genes <- read.table('input/2023-08-04-POP-4_Candidate_Genes_top5pc.txt', 
+#                          header = FALSE)
+# bias_and_all$top5pc_pop4 <- bias_and_all$gene %in% top5pc_pop4_genes$V1
+# bias_and_all$top5pc_pop4 <- as.factor(bias_and_all$top5pc_pop1*1)
 
 ```
 
@@ -338,30 +451,6 @@ bias_and_all$top5pc_pop4 <- as.factor(bias_and_all$top5pc_pop1*1)
 
 ```
 
-Other PCs
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-# 
-# ggplot(bias_and_all %>% arrange(candens), 
-#        aes(x = PC2, y = PC3, colour = candens, shape = candens)) +
-#   geom_point(size = 4, alpha = 0.6) +
-#   scale_colour_viridis_d(option = "D", direction = 1, name = "Genes in top 1%",
-#                          labels = c("No","Yes")) +
-#   guides(shape = FALSE) +
-#   theme_minimal()
-# 
-```
- 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-# ggplot(bias_and_all %>% arrange(candens), 
-#        aes(x = PC3, y = PC4, colour = candens, shape = candens)) +
-#   geom_point(size = 4, alpha = 0.6) +
-#   scale_colour_viridis_d(option = "D", direction = 1, name = "Genes in top 1%",
-#                          labels = c("No","Yes")) +
-#   guides(shape = FALSE) +
-#   theme_minimal()
-# 
-```
 
 
 

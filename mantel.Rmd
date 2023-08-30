@@ -47,5 +47,4 @@ p_value <- mantel_result$signif
 print(paste("Correlation coefficient:", correlation_coefficient))
 print(paste("P-value:", p_value))
 
-
 ```
