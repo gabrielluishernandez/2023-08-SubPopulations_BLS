@@ -1,1 +1,5 @@
+#Get the sample names for the 4 populations from github.
 cat 2023_08_02_Pop1_sample_name.txt 2023_08_02_Pop2_sample_name.txt 2023_08_02_Pop3_sample_name.txt 2023_08_04_Pop4_sample_name.txt > ~/gitstuff/2023-08-02-Single_Population_BLS/2023-09-04-Bootstrapping-subpops/All_4pops_samples.txt
+
+#Use this script to randomly select with replacement 34 samples 100 times
+./random_sample_selection.sh
