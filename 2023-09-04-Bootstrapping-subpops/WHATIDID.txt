@@ -6,4 +6,16 @@ cat 2023_08_02_Pop1_sample_name.txt 2023_08_02_Pop2_sample_name.txt 2023_08_02_P
 
 #Filter the main VCF with each of the sets
 ./filter_vcf_for_sample_names.sh
-git clone https://github.com/bioXiaoheng/BallerMixPlus.git
+
+#Ballermix
+#git clone https://github.com/bioXiaoheng/BallerMixPlus.git
+
+#NCD
+#in bash:
+./prepare_ncd_bcftools.sh
+
+#in  Rstudio:
+02-prepare_ncd_in_R.R
+
+#In R in conda env:
+Calculate_NCD.R
