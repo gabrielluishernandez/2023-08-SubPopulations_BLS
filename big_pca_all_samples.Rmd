@@ -25,9 +25,23 @@ bias_and_all$candens <- as.factor(bias_and_all$candens)
 bias_and_all$hymenop <- as.factor(bias_and_all$hymenop)
 
 # Remove columns by indexing
-columns_to_remove <- c("snp", "chr", "facet", "start", "end","drosophila",
-                       "pop1", "pop2", "pop3", "pop4", "density", "candens",
-                       "immune_new", "immune", "hymenop", "ors", "ASE")
+columns_to_remove <- c("snp",
+                       "chr", 
+                       "facet",
+                       "start", 
+                       "end",
+                       "drosophila",
+                       "pop1",
+                       "pop2",
+                       "pop3", 
+                       "pop4",
+                       "candens",
+                       "immune_new", 
+                       "immune", 
+                       "hymenop",
+                       "ors", 
+                       "ASE"
+                       )
 bias_and_all <- bias_and_all[, -which(names(bias_and_all) %in% columns_to_remove)]
 
 
@@ -80,12 +94,12 @@ scree_data <- data.frame(
   Cumulative_Variance = cumulative_variance
 )
 
-#ggplot(scree_data, aes(x = PC, y = Cumulative_Variance)) +
- # geom_line() +
-  #geom_point() +
-  #labs(x = "Number of Principal Components", y = "Cumulative Explained Variance") +
-  #ggtitle("Scree Plot: Cumulative Explained Variance") +
-  #theme_minimal()
+ggplot(scree_data, aes(x = PC, y = Cumulative_Variance)) +
+geom_line() +
+geom_point() +
+labs(x = "Number of Principal Components", y = "Cumulative Explained Variance") +
+ggtitle("Scree Plot: Cumulative Explained Variance") +
+theme_minimal()
 
 ```
 
@@ -155,7 +169,7 @@ plot_categories_single <- ggplot(bias_and_all %>%
                                    subset(gene != "LOC105199771") %>% 
                                    arrange(candens), 
        aes(x = PC1, y = PC2, colour = facet2, shape = candens)) +
-  geom_point(size = 4, alpha = 0.5) +
+  geom_jitter(size = 4, alpha = 0.5) +
   scale_colour_viridis_d(option = "D", direction = 1, name = "Category") +
   #labs(subtitle = "Candidates from previous analysis") +
   #guides(shape = FALSE) +

@@ -8,11 +8,16 @@ library(ggpubr)
 library(ggrepel)
 ```
 
-# PCA for subpopulation
-### CLR
+
+#### Is there a correlation between meassuring summary statistics (clr, ncd) for the  
+#### totality of the 240 samples and those meassured in 4 sub-populations? 
+x-axis: Summary statistics calculated with the totality of the 240 samples.  
+y-axis: the average of the summary statistics calculated for the 4 subpopulations.  
+
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-##
+##### CLR
+
 pop1_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-1.txt', 
                          header = TRUE)
 pop1_genes <- pop1_genes[, c("gene", "clr")]
@@ -102,16 +107,18 @@ clr_plot_data$candens <- as.factor(clr_plot_data$candens)
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-ggplot(clr_plot_data %>% arrange(candens), 
+clr_plot_average <- ggplot(clr_plot_data %>% arrange(candens), 
        aes(x = Clr, y = Mean_Pops_Clr, colour = candens)) +
   geom_point(size = 4, alpha = 0.6) +
   geom_smooth(method = "lm", se = TRUE, color = "grey") +  # Adding linear regression line
   #geom_label_repel(data = strong_genes, aes(label = gene), colour = "black",
    #                size= 2, nudge_x = 3, nudge_y = 6, direction = "both",
     #               box.padding = 0.3, max.overlaps = 50) +
-  scale_colour_viridis_d(option = "D", direction = -1, name = "Genes in top 1%",
+  scale_colour_viridis_d(option = "D", 
+                         direction = -1,
+                        name = "Candidate",
                         labels = c("No","Yes")) + 
-  labs(x = "CLR all samples", y = "CLR mean for 4 pops") + 
+  labs(y = "Mean 4-pops") + 
   #guides(shape = FALSE) +
   theme_minimal()
 
@@ -131,12 +138,13 @@ pca_scores <- as.data.frame(pca_result$x)
 
 ```
 
-Explained variance 
+
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Explained variance 
 
 explained_variance <- (pca_result$sdev^2) / sum(pca_result$sdev^2)
-explained_variance
+
 
 ```
 
@@ -154,10 +162,11 @@ pca_ballermix <- ggplot(pca_scores, aes(x = PC1, y = PC2, color = as.factor(row_
 ```
 
 
-### NCD
+
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-##
+##### NCD
+
 pop1_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-1.txt', 
                          header = TRUE)
 pop1_genes <- pop1_genes[, c("gene", "ncd05")]
@@ -230,16 +239,18 @@ ncd_plot_data$candens <- as.factor(ncd_plot_data$candens)
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-ggplot(ncd_plot_data %>% arrange(candens), 
+ncd05_plot_average <-ggplot(ncd_plot_data %>% arrange(candens), 
        aes(x = ncd05, y = mean_pops_ncd, colour = candens)) +
   geom_point(size = 4, alpha = 0.6) +
   geom_smooth(method = "lm", se = TRUE, color = "grey") +  # Adding linear regression line
   #geom_label_repel(data = strong_genes, aes(label = gene), colour = "black",
    #                size= 2, nudge_x = 3, nudge_y = 6, direction = "both",
     #               box.padding = 0.3, max.overlaps = 50) +
-  scale_colour_viridis_d(option = "C", direction = -1, name = "Genes in top 1%",
+  scale_colour_viridis_d(option = "C", 
+                         direction = -1, 
+                         name = "Candidate",
                         labels = c("No","Yes")) + 
-  labs(x = "CLR all samples", y = "CLR mean for 4 pops") + 
+  labs(y = "Mean 4-pops") + 
   #guides(shape = FALSE) +
   theme_minimal()
 
@@ -258,12 +269,12 @@ pca_scores <- as.data.frame(pca_result$x)
 #colnames(pca_scores) <- c("PC1", "PC2")  # Rename columns
 ```
 
-Explained variance 
+
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
+#Explained variance 
 
 explained_variance <- (pca_result$sdev^2) / sum(pca_result$sdev^2)
-explained_variance
 
 ```
 
@@ -282,10 +293,11 @@ pca_ncd <- ggplot(pca_scores, aes(x = PC1, y = PC2, color = as.factor(row_number
 
 
 
-# Density-based (combined ncd and clr)
+
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-##
+### Density-based (combined ncd and clr)
+
 pop1_genes <- read.table('input/2023-08-04-ranked_by_dens-POP-1.txt', 
                          header = TRUE)
 pop1_genes <- pop1_genes[, c("gene", "density")]
@@ -361,16 +373,18 @@ dens_plot_data$candens <- as.factor(dens_plot_data$candens)
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-ggplot(dens_plot_data %>% arrange(candens), 
+dens_plot_average <- ggplot(dens_plot_data %>% arrange(candens), 
        aes(x = density, y = means_pops_density, colour = candens)) +
   geom_point(size = 4, alpha = 0.6) +
   geom_smooth(method = "lm", se = TRUE, color = "grey") +  # Adding linear regression line
   #geom_label_repel(data = strong_genes, aes(label = gene), colour = "black",
    #                size= 2, nudge_x = 3, nudge_y = 6, direction = "both",
     #               box.padding = 0.3, max.overlaps = 50) +
-  scale_colour_viridis_d(option = "A", direction = -1, name = "Genes in top 1%",
+  scale_colour_viridis_d(option = "A", 
+                         direction = -1, 
+                         name = "Candidate",
                         labels = c("No","Yes")) + 
-  labs(x = "CLR all samples", y = "CLR mean for 4 pops") + 
+  labs(y = "Mean 4-pops") + 
   #guides(shape = FALSE) +
   theme_minimal()
 
@@ -391,12 +405,12 @@ pca_scores <- as.data.frame(pca_result$x)
 ```
 
 
-Explained variance 
+
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
+#Explained variance 
 
 explained_variance <- (pca_result$sdev^2) / sum(pca_result$sdev^2)
-explained_variance
 
 ```
 
@@ -414,6 +428,16 @@ pca_density <- ggplot(pca_scores, aes(x = PC1, y = PC2, color = as.factor(row_nu
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
+grid.arrange(clr_plot_average, ncd05_plot_average, dens_plot_average, ncol = 2)
+
+```
+
+##### These are PCAs with the goal to separate the populations.  
+##### To check if the populations are independent.  
+##### We could conclude that they are.  
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
 grid.arrange(pca_ballermix, pca_ncd, pca_density)
 
 ```
@@ -424,7 +448,7 @@ grid.arrange(pca_ballermix, pca_ncd, pca_density)
 
 #####################
 
-# 2. Using MASS to calculate density
+Using MASS to calculate density
 https://slowkow.com/notes/ggplot2-color-by-density/
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
@@ -471,24 +495,29 @@ means_for_density$density <- get_density(means_for_density$Mean_Pops_Clr/sd_clr,
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 #%>% arrange(desc(density))
-ggplot(means_for_density  ,
-       aes(Mean_Pops_Clr, mean_pops_ncd)) + 
-  geom_point(aes(colour = density), alpha = 0.7, size = 5, shape =18) +
-  scale_colour_viridis_c(option = "D", direction = 1, name = "Density") +
-  #geom_density_2d(bins = 550, alpha = 0.3, color = "black") +
-  xlab("B0-MAF") + ylab("NCD") + 
-  theme_minimal()
+# ggplot(means_for_density  ,
+#        aes(Mean_Pops_Clr, mean_pops_ncd)) + 
+#   geom_point(aes(colour = density), alpha = 0.7, size = 5, shape =18) +
+#   scale_colour_viridis_c(option = "D", direction = 1, name = "Density") +
+#   #geom_density_2d(bins = 550, alpha = 0.3, color = "black") +
+#   xlab("B0-MAF") + ylab("NCD") + 
+#   theme_minimal()
 
 ```
 
 
 
 ### Candidate genes
+##### The candiadate genes are those in the top 1% of the density distribution  
+##### which was calculated with the mean of the summary statistics measured  
+##### separately for the 4 subpopulations. 
+##### These genes are shared by the 4 subpopulations and thus we belive the 
+##### effect of environmental factors is diminished on them.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Select the top 1%
 
-quantile(means_for_density$density, 0.05)
+#quantile(means_for_density$density, 0.01)
 
 means_for_density$candens <- "0"
 
@@ -515,7 +544,8 @@ means_for_density <- means_for_density[order(means_for_density$density, decreasi
 #eliminate duplicates keeping the entry with the highest Mean_Pops_Clr per gene.
 means_for_density <- means_for_density[!duplicated(means_for_density$gene), ]
 
-nrow(subset(means_for_density, candens == "1"))
+#nrow(subset(means_for_density, candens == "1"))
+
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
@@ -537,9 +567,17 @@ ggplot(means_for_density %>%
 # 1. Measuring CLR and NCD per sub-population
 # 2. Calculate the means for these values 
 # 3. Use the density "trick" to select those loci with lower density (the outliers)
+nrow(subset(means_for_density, candens == "1"))
 
 average_4_subpop_candidates <- subset(means_for_density, candens == "1") %>% arrange(density)
 average_4_subpop_candidates$gene
+
+write.table(average_4_subpop_candidates$gene,
+            "tmp/average_4_subpop_cand_gene.txt",
+            quote = FALSE, 
+            row.names = FALSE,
+            col.names = FALSE
+            )
 
        
 ```
