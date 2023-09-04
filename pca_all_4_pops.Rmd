@@ -548,12 +548,38 @@ means_for_density <- means_for_density[!duplicated(means_for_density$gene), ]
 
 ```
 
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+strong_genes <- subset(bias_and_all, PC1 >= 5) %>% arrange(desc(PC1))
+
+write.table(strong_genes, file = "stong_genes_pca.txt", quote = FALSE,
+            row.names = FALSE, col.names = FALSE)
+
+
+ensemble_names <- read.table('pca_genes_ensembl.txt', 
+                         header = TRUE, sep = "\t")
+
+strong_genes <- merge(strong_genes, ensemble_names, by = "gene" )
+
+#
+gene1 <- subset(strong_genes, gene == "LOC105207562")
+gene2 <- subset(strong_genes, gene == "LOC105200045")
+gene3 <- subset(strong_genes, gene == "LOC105202344")
+
+three_genes <- rbind(gene1, gene2, gene3)
+
+```
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 #%>% subset(gene != "LOC105199771")
 ggplot(means_for_density %>% 
   arrange(desc(density)), aes(Mean_Pops_Clr, mean_pops_ncd)) + 
   geom_point(aes(colour = density, shape = candens), alpha = 0.7, size = 5) +
   scale_colour_viridis_c(option = "D", direction = 1, name = "Density") +
+  geom_label_repel(data = three_genes, aes(label = name), colour = "black",
+                   size = 2, nudge_x = 2, nudge_y = 0.45, direction = "both",
+                   box.padding = 0.3, max.overlaps = 50) +
   geom_density_2d(bins = 80, alpha = 0.3, color = "black") +
   labs(shape = "Candidates") + xlab("B0-MAF") + ylab("NCD1") + 
   scale_shape_manual(values = c(20, 18),

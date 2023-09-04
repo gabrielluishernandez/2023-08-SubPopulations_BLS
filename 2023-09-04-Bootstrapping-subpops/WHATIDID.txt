@@ -3,3 +3,7 @@ cat 2023_08_02_Pop1_sample_name.txt 2023_08_02_Pop2_sample_name.txt 2023_08_02_P
 
 #Use this script to randomly select with replacement 34 samples 100 times
 ./random_sample_selection.sh
+
+#Filter the main VCF with each of the sets
+./filter_vcf_for_sample_names.sh
+git clone https://github.com/bioXiaoheng/BallerMixPlus.git
