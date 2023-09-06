@@ -7,7 +7,7 @@ module load parallel
 parallel -j 8  "sed 's/|/\t/g' results/2023-08-02-NCD1_win5Kb_step2500b.txt | grep {} > tmp/08-03-{}-NCD.txt " :::: chr_numbers
 
 # Modify Ballermix files
-awk '{print "CM031902.1",$1,$1+1,$3}' results/08-02-B0maf_ChrCM031901.1.txt > tmp/08-03-chr01-B0maf.txt
+awk '{print "CM031901.1",$1,$1+1,$3}' results/08-02-B0maf_ChrCM031901.1.txt > tmp/08-03-chr01-B0maf.txt
 awk '{print "CM031902.1",$1,$1+1,$3}' results/08-02-B0maf_ChrCM031902.1.txt > tmp/08-03-chr02-B0maf.txt
 awk '{print "CM031903.1",$1,$1+1,$3}' results/08-02-B0maf_ChrCM031903.1.txt > tmp/08-03-chr03-B0maf.txt
 awk '{print "CM031904.1",$1,$1+1,$3}' results/08-02-B0maf_ChrCM031904.1.txt > tmp/08-03-chr04-B0maf.txt
