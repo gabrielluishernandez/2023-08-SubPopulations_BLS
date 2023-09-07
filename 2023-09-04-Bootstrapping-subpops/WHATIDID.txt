@@ -20,3 +20,4 @@ cat 2023_08_02_Pop1_sample_name.txt 2023_08_02_Pop2_sample_name.txt 2023_08_02_P
 #In R in conda env:
 Calculate_NCD.R
 ./move_NCD_to_Ballermix_results.sh
+combine_optimizes_ncd_ballermix.sh
