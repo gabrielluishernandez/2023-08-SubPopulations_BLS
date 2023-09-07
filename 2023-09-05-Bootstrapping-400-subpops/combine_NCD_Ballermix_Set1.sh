@@ -86,7 +86,7 @@ for i in {1..4}; do
  grep -Po "gene=\K.*?;" set-1/pop${i}-All_Chr_anotation.gff | sed 's/;//g' | uniq > set-1/pop${i}-list_unique_ids.txt
  grep -f set-1/pop${i}-list_unique_ids.txt set-1/pop${i}-All_Chr_anotation.gff | awk '{print $(NF-9),$(NF-7),$(NF-6),$(NF-5),$(NF-4),$(NF-3),$(NF-2),$(NF-1)}' > set-1/pop${i}-out.txt
  grep -Po "gene=\K.*?;" set-1/pop${i}-All_Chr_anotation.gff | sed 's/;//g' > set-1/pop${i}-list_ids.txt
- paste set-1/pop${i}-list_ids.txt set-1/pop${i}-out.txt > set-1/pop${i}-Final_Genes_Scored.txt
+ paste set-1/pop${i}-list_ids.txt set-1/pop${i}-out.txt > set-1/set1-pop${i}-Final_Genes_Scored.txt
 
 
 done
