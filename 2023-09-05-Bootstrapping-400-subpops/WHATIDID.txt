@@ -1,0 +1,6 @@
+There are 100 sets. Each set has 4 populations with the sample size from the original pops
+./create_sub_pops.sh
+There are 100 of these scripts (one per set):
+qsub filter-vcf_do-ballermix-set100.sh
+It took ~36 hours for the 100 scripts to run
+./prepare_ncd_bcftools.sh
