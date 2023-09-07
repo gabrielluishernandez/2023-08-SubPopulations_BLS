@@ -1,6 +1,18 @@
 There are 100 sets. Each set has 4 populations with the sample size from the original pops
 ./create_sub_pops.sh
+
 There are 100 of these scripts (one per set):
 qsub filter-vcf_do-ballermix-set100.sh
 It took ~36 hours for the 100 scripts to run
+
+#NCD
 ./prepare_ncd_bcftools.sh
+In Rstudio:
+
+create_RDS_for_NCDs.Rmd
+module load anaconda3/
+git clone https://github.com/bbitarello/NCD-statistics.git
+conda info --envs
+conda activate r_local
+module load R
+Rscript calculate_NCD.R
