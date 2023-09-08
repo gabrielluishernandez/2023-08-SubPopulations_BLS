@@ -16,3 +16,4 @@ conda info --envs
 conda activate r_local
 module load R
 Rscript calculate_NCD.R
+./launch_all_qsubs.sh
