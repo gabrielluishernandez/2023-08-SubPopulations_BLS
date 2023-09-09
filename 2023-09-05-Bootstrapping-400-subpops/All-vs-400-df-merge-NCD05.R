@@ -41,7 +41,12 @@ for (name in names(data_list)) {
 
 # Add a column with the mean ncd05 value for each gene
 final_data <- final_data %>%
-  mutate(mean_ncd05 = rowMeans(select(., starts_with("ncd05_")), na.rm = TRUE))
+  rowwise() %>%
+  mutate(
+    mean_ncd05 = mean(c_across(starts_with("ncd05_")), na.rm = TRUE),
+    sd_ncd05 = sd(c_across(starts_with("ncd05_")), na.rm = TRUE)
+  ) %>%
+  ungroup()
 
 
 #Combine dfs to have information about all-240-samples from before.

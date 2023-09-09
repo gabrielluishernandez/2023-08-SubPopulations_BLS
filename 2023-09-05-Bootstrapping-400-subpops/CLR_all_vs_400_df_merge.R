@@ -41,7 +41,12 @@ for (name in names(data_list)) {
 
 # Add a column with the mean clr value for each gene
 final_data <- final_data %>%
-  mutate(mean_clr = rowMeans(select(., starts_with("clr_")), na.rm = TRUE))
+  rowwise() %>%
+  mutate(
+    mean_clr = mean(c_across(starts_with("clr_")), na.rm = TRUE),
+    sd_clr = sd(c_across(starts_with("clr_")), na.rm = TRUE)
+  ) %>%
+  ungroup()
 
 
 #Combine dfs to have information about all-240-samples from before.
