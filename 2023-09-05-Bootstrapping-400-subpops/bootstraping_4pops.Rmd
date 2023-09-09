@@ -13,73 +13,19 @@ library(ggrepel)
 x-axis: Summary statistics calculated with the totality of the 240 samples.  
 y-axis: the average of the summary statistics calculated for the 4 subpopulations.  
 
+# CLR
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-
-# Initialize an empty list to store data frames
-data_list <- list()
-
-# Loop through each set
-for (i in 1:100) {
-  # Loop through each population
-  for (pop in 1:4) {
-    # Construct the file path
-        filepath <- paste0("set-", i, "/set-", i, "-pop", pop, "-ranked-by_dens.txt")
-    
-    # Read the file into a data frame
-    temp_data <- read.table(filepath, header = TRUE)
-    temp_data <- temp_data[, c("gene", "clr")]
-    names(temp_data) <- c("gene", "clr")
-    #temp_data <- pivot_wider(temp_data, names_from = "gene", 
-     #                    values_from = "clr")
-    
-    # Store the data frame in the list
-    list_name <- paste0("set", i, "_pop", pop)
-    data_list[[list_name]] <- temp_data
-  }
-}
-
+# Get the results from the heavy lifting done in R apocrita
+from_apocrita_400 <- read.table("results/Master_CLR_combined_400.txt", header = TRUE)
+from_apocrita_400$candens <- as.factor(from_apocrita_400$candens) 
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-
-# Initialize an empty data frame for the final result
-final_data <- data_frame(gene = character(0))
-
-# Loop through the list and merge
-for (name in names(data_list)) {
-  # Get the data frame
-  temp_data <- data_list[[name]]
-  
-  # Rename the 'clr' column to make it unique across data frames
-  temp_data <- rename(temp_data, !!paste0("clr_", name) := clr)
-  
-  # Merge with the final data frame
-  final_data <- full_join(final_data, temp_data, by = "gene")
-}
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-
-# Add a column with the mean clr value for each gene
-final_data <- final_data %>%
-  mutate(mean_clr = rowMeans(select(., starts_with("clr_")), na.rm = TRUE))
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-bias_and_all <- read.table('input/2023_08_22_MASTER_cleaned_all_pops.txt',
-                             header = TRUE)
-
-bias_and_all <- merge(bias_and_all, final_data, by = "gene")
-bias_and_all$candens <- as.factor(bias_and_all$candens)
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-gene1 <- subset(bias_and_all, gene == "LOC105207562")
-gene2 <- subset(bias_and_all, gene == "LOC105200045")
-gene3 <- subset(bias_and_all, gene == "LOC105202344")
+# Information for ggplot anotation
+gene1 <- subset(from_apocrita_400, gene == "LOC105207562")
+gene2 <- subset(from_apocrita_400, gene == "LOC105200045")
+gene3 <- subset(from_apocrita_400, gene == "LOC105202344")
 
 three_genes <- rbind(gene1, gene2, gene3)
 
@@ -87,18 +33,89 @@ three_genes <- rbind(gene1, gene2, gene3)
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-clr_plot_400 <- ggplot(bias_and_all %>% arrange(candens), 
+clr_plot_400 <- ggplot(from_apocrita_400 %>% arrange(candens), 
        aes(x = clr, y = mean_clr, colour = candens)) +
-  geom_point(size = 4, alpha = 0.6) +
-  geom_smooth(method = "lm", se = TRUE, color = "grey") +  # Adding linear regression line
+  geom_point(size = 3, alpha = 0.6) +
+  # Adding linear regression line
+  geom_smooth(method = "lm", se = TRUE, color = "grey") +  
+  # Add names to selected points
   geom_label_repel(data = three_genes, aes(label = gene), colour = "black",
                    size= 2, nudge_x = 3, nudge_y = 6, direction = "both",
                    box.padding = 0.3, max.overlaps = 50) +
-  scale_colour_viridis_d(option = "D", 
-                         direction = -1,
-                        name = "Candidate",
-                        labels = c("No","Yes")) + 
- # labs(y = "Mean 4-pops") + 
+  # Change colors
+  scale_colour_viridis_d(option = "D", direction = -1, 
+                         name = "Candidate", labels = c("No","Yes")) + 
+  #Change axis labels
+  labs(y = "CLR mean 400 subpops", x = "CLR all samples") + 
+  #guides(shape = FALSE) +
+  theme_minimal()
+clr_plot_400
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Save the plot to the current working directory
+ggsave("results/clr_plot_400.png", plot = clr_plot_400)
+
+```
+
+# NCD
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Get the results from the heavy lifting done in R apocrita
+from_apocrita_400 <- read.table("results/Master_ncd05_combined_400.txt", header = TRUE)
+from_apocrita_400$candens <- as.factor(from_apocrita_400$candens) 
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Information for ggplot anotation
+gene1 <- subset(from_apocrita_400, gene == "LOC105207562")
+gene2 <- subset(from_apocrita_400, gene == "LOC105200045")
+gene3 <- subset(from_apocrita_400, gene == "LOC105202344")
+
+three_genes <- rbind(gene1, gene2, gene3)
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+ncd_plot_400 <- ggplot(from_apocrita_400 %>% arrange(candens), 
+       aes(x = ncd05, y = mean_ncd05, colour = candens)) +
+  geom_point(size = 3, alpha = 0.6) +
+  # Adding linear regression line
+  geom_smooth(method = "lm", se = TRUE, color = "grey") +  
+  # Add names to selected points
+  geom_label_repel(data = three_genes, aes(label = gene), colour = "black",
+                   size= 2, nudge_x = -0.1, nudge_y = -0.5, direction = "both",
+                   box.padding = 0.3, max.overlaps = 50) +
+  # Change colors
+  scale_colour_viridis_d(option = "C", direction = -1, 
+                         name = "Candidate", labels = c("No","Yes")) + 
+  #Change axis labels
+  labs(y = "NCD mean 400 subpops", x = "NCD all samples") + 
+  #guides(shape = FALSE) +
+  theme_minimal()
+ncd_plot_400
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+ggplot(from_apocrita_400 %>% subset(gene != "LOC105199771") 
+                       %>% arrange(candens), 
+       aes(x = ncd05, y = mean_ncd05, colour = candens)) +
+  geom_point(size = 3, alpha = 0.6) +
+  # Adding linear regression line
+  geom_smooth(method = "lm", se = TRUE, color = "grey") +  
+  # Add names to selected points
+  geom_label_repel(data = three_genes, aes(label = gene), colour = "black",
+                   size= 2, nudge_x = -0.02, nudge_y = -0.2, direction = "both",
+                   box.padding = 0.3, max.overlaps = 50) +
+  # Change colors
+  scale_colour_viridis_d(option = "C", direction = -1, 
+                         name = "Candidate", labels = c("No","Yes")) + 
+  #Change axis labels
+  labs(y = "NCD mean 400 subpops", x = "NCD all samples") + 
   #guides(shape = FALSE) +
   theme_minimal()
 
@@ -107,32 +124,8 @@ clr_plot_400 <- ggplot(bias_and_all %>% arrange(candens),
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 # Save the plot to the current working directory
-ggsave("clr_plot_400.png", plot = clr_plot_400)
-
-
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-
-from_apocrita_400 <- read.table("Master_CLR_combined_400.txt", header = TRUE)
-from_apocrita_400$candens <- as.factor(from_apocrita_400$candens) 
-```
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-
-ggplot(from_apocrita_400 %>% arrange(candens), 
-       aes(x = clr, y = mean_clr)) +
-  geom_point(size = 4, alpha = 0.6, color = "red") +
-  geom_smooth(method = "lm", se = TRUE, color = "grey") +  # Adding linear regression line
-  geom_label_repel(data = gene1, aes(label = gene), colour = "black",
-                   size= 2, nudge_x = 3, nudge_y = 6, direction = "both",
-                   box.padding = 0.3, max.overlaps = 50) +
-  #scale_colour_viridis_d(option = "D", 
-   #                      direction = -1,
-    #                    name = "Candidate",
-     #                   labels = c("No","Yes")) + 
-  labs(y = "Mean 400 pops") + 
-  #guides(shape = FALSE) +
-  theme_minimal()
+ggsave("results/ncd_plot_400.png", plot = ncd_plot_400)
 
 ```
+
+
