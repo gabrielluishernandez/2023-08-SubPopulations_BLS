@@ -101,6 +101,9 @@ clr_plot_data$candens <- as.factor(clr_plot_data$candens)
 #head(coef(mod1))
 #combined_clr <- coef(mod1)
 
+write.table(clr_plot_data, "results/real_4_pops_clr.txt", 
+            col.names = TRUE, quote = FALSE)
+
 
 ```
 
@@ -233,7 +236,8 @@ ncd_plot_data_to_combine <- data.frame(
 ncd_plot_data <- merge(ncd_plot_data_to_combine, bias_and_all, by= "gene")
 ncd_plot_data$candens <- as.factor(ncd_plot_data$candens)
 
-
+write.table(ncd_plot_data, "results/real_4_pops_ncd.txt", 
+            col.names = TRUE, quote = FALSE)
 ```
 
 
@@ -360,14 +364,15 @@ names(density) <- bias_and_all$gene
 
 dens_plot_data <- data.frame(
   gene = common_loci,
-  ncd = ncd[common_loci],
+  density_real = density[common_loci],
   means_pops_density = means_pops_density
 )
 
 dens_plot_data <- merge(dens_plot_data, bias_and_all, by= "gene")
 dens_plot_data$candens <- as.factor(dens_plot_data$candens)
 
-
+write.table(dens_plot_data, "results/real_4_pops_density.txt", 
+            col.names = TRUE, quote = FALSE)
 ```
 
 
