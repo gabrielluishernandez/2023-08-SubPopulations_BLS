@@ -73,11 +73,11 @@ ggplot(density_100_sets %>% arrange(shuffled_pops_mean100) %>% arrange(candens),
   # Adding linear regression line
   #geom_smooth(method = "lm", se = TRUE, color = "grey") +  
   # Add names to selected points
-   geom_label_repel(data = genes_names, aes(label = gene), colour = "black",
-                    size= 2, nudge_x = 0.002, nudge_y = 0.003, 
-                    direction = "both",
-                    box.padding = 0.3, max.overlaps = 50) +
-  # Change colors
+  #  geom_label_repel(data = genes_names, aes(label = gene), colour = "black",
+  #                   size= 2, nudge_x = 0.002, nudge_y = 0.003, 
+  #                   direction = "both",
+  #                   box.padding = 0.3, max.overlaps = 50) +
+  # # Change colors
   scale_colour_viridis_c(option = "B", direction = 1, name = "SD for shuffeled") + 
   geom_abline(slope = 1, intercept = 0, linetype = "dashed")+
   #Change axis labels
