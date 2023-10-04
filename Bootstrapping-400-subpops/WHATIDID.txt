@@ -1,16 +1,17 @@
 ### There are 100 sets. Each set has 4 populations with the sample size from the original pops
 ./01_Create_artificial_subpops.sh
 
-# There are 100 of these scripts (one per set) stored in `code_filter_vcf_ballermix` directory
+# There are 100 of these scripts (one per set) stored in `scripts_filter_vcf_ballermix` directory
 # This scripts filter the vcf and run ballermix.
 # They were exetudet like this:
+
 qsub filter-vcf_do-ballermix-set100.sh
 #(It took ~36 hours for the 100 scripts to run)
 
 ### NCD
 ./02_Prepare_NCD01_with_bcftools.sh
 
-# In Rstudio:
+# (In Rstudio)
 03_Create_RDSs_for_NCD01s.Rmd
 
 module load anaconda3/
@@ -21,10 +22,10 @@ module load R
 # (In terminal)
 Rscript 04_Calculate_NCD.R
 
-## Combine the results per set. The scripts are in `code_combine_final_scores`
+## Combine the results per set. The scripts are in `scripts_combine_final_scores`
 ./05_Run_Combine_score_scripts.sh
 
-## Identify the candidate genes per population. The scripts are in  `code_candidate_genes_from_R`
+## Identify the candidate genes per population. The scripts are in  `scripts_candidate_genes_from_R`
 ./06_Run_Candidate_selection.sh
 
 ## Calculate mean and sd for each gene based on the 400 data points. 
