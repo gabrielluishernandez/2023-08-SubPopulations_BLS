@@ -18,8 +18,20 @@ git clone https://github.com/bbitarello/NCD-statistics.git
 conda activate r_local
 module load R
 
-Rscript calculate_NCD.R
-./launch_all_qsubs.sh
-./launch_all_R.sh
-Rscript All-vs-400-df-merge-NCD05.R
-Rscript Mean_SD_per_set.R
+# (In terminal)
+Rscript 04_Calculate_NCD.R
+
+## Combine the results per set. The scripts are in `code_combine_final_scores`
+./05_Run_Combine_score_scripts.sh
+
+## Identify the candidate genes per population. The scripts are in  `code_candidate_genes_from_R`
+./06_Run_Candidate_selection.sh
+
+## Calculate mean and sd for each gene based on the 400 data points. 
+
+Rscript 07_mean_sd_Density.R 
+Rscript 08_mean_sd_NCD.R 
+Rscript 09_mean_sd_CLR.R
+Rscript 10_Mean_SD_per_set.R
+
+ 
