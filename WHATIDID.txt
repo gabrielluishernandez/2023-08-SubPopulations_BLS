@@ -1,23 +1,27 @@
-### Filter VCF ###
-Got the sample names from ~/2023-03-27-General_summary_BS195/map_samples.Rmd
+######## Filter VCF ########
+# I got the sample names from ~/2023-03-27-General_summary_BS195/map_samples.Rmd
 
-# Filter VCF 
 ./01_filter_vcf_for_sample_names.sh
 
-# Ballermix
+######## Run the Ballermix summary statistic ########
+
 ./02_ballermix.sh
 
-###### NCD ###
+######## NCD summary statistic ########
 # Get tools
+
 git clone https://github.com/bbitarello/NCD-statistics.git
 
-#Import the result of this command to R
+# Import the result of this command to R
+
 module load bcftools/
 bcftools query -f '%CHROM\t%POS\t%CHROM|%POS\t%REF\t%ALT\t%AF\n' tmp/2023-08-02-Pop3_only.vcf.gz > tmp/2023-08-02-table_for_ncd_input.txt
 
-#Run 03_prepare_input.Rmd in Rstudio
-
+# Run 03_prepare_input.Rmd in Rstudio
 module load R/
+R
+# Run the following commands inside R as described in their GitHub
+
 source('NCD-statistics/scripts/preamble.R')
 source('NCD-statistics/scripts/NCD_func.R')
 readRDS('tmp/08-02-NCD_input.rds')-> SNP_input 
@@ -25,8 +29,10 @@ system.time(sep.run.ncd1<-foreach(x=1:16, .combine="rbind", .packages=c("data.ta
 write.table(sep.run.ncd1, file='results/2023-08-02-NCD1_win5Kb_step2500b.txt', quote = FALSE, row.names = FALSE, sep = "\t")
 
 # Re-organizing the output to have a column for chr only
-sed 's/|/\t/g' results/2023-08-02-NCD1_win5Kb_step2500b.txt | sed 's/\s/\t/g'  > tmp/fixing_out5Kb.txt
-#Then add manually the name for the Start and End new columns
 
-###### Combine Ballermix and NCD ###
+sed 's/|/\t/g' results/2023-08-02-NCD1_win5Kb_step2500b.txt | sed 's/\s/\t/g'  > tmp/fixing_out5Kb.txt
+# Then add manually the name for the Start and End new columns
+
+######## Combine Ballermix and NCD ########
+
 ./04_combine_ncd_ballermix.sh
